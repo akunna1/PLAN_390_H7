@@ -3,11 +3,15 @@
 library(tidyverse)
 library(tidycensus)
 library(sf)
+library(dplyr)
+library(tidyr)
+library(data.table)
+library(ggplot2)
 
-# retrieve some information from the 2019 5-year ACS
+# Retrieving some information from the 2019 5-year ACS
 acs_vars = load_variables(2019, "acs5")
 
-# The data is huge so save it to a file and view it in Excel.
+# The data is huge, so I am saving it to a file and view it in Excel.
 write_csv(acs_vars, "acsvars.csv")
 
 # Retrieve ACS data on the income levels of the households in Sacramento county in California
@@ -39,3 +43,18 @@ household_income = get_acs(
 )
 
 View(household_income)
+
+# To do any spatial analysis, I have to join the household_income data to spatial information
+# Spatial information was obtained from: https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html
+
+# Download 2010 US County shapefile from the site, and load it into R.
+counties = read_sf("tl_2010_us_county10.shp")
+
+# Filtering just CA counties using the state FIPS (STATEFP10) code to do that
+ca_counties = filter(counties, STATEFP10=="06")
+
+# renaming column GEOID column in household_income dataset to GEOID10
+household_income$GEOID10 <- household_income$GEOID
+
+# Join the datasets together
+ca_counties = left_join(ca_counties, household_income, by="GEOID10")
