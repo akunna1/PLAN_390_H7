@@ -7,6 +7,17 @@ library(dplyr)
 library(tidyr)
 library(data.table)
 library(ggplot2)
+library(raster)
+library(rgdal)
+library(terra)
+
+# Calling in Raster files
+visible_red = rast("sacramento_landsat_red.tif")
+near_infrared = rast("sacramento_landsat_near_infrared.tif")
+
+# Calculating NDVI
+ndvi = (near_infrared - visible_red)/(near_infrared + visible_red)
+plot(ndvi)
 
 # Retrieving some information from the 2019 5-year ACS
 acs_vars = load_variables(2019, "acs5")
